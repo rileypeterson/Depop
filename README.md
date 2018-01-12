@@ -1,9 +1,6 @@
 # Depop
 Program to follower and unfollow users
 
-![depop1](https://user-images.githubusercontent.com/29719483/34895125-2d2b2436-f799-11e7-9ce0-bc062547cfb9.png)
-![depop2](https://user-images.githubusercontent.com/29719483/34895127-2d5fcb1e-f799-11e7-81ba-74430260032c.png)
-
 Steps/Requirements to use this code:  
 
 1. Install Python (https://www.python.org/downloads/). Personally I use Spyder IDE through Anaconda (https://www.anaconda.com/download/).  
@@ -34,3 +31,5 @@ Cheers,
 
 Riley
 
+![depop2](https://user-images.githubusercontent.com/29719483/34895127-2d5fcb1e-f799-11e7-81ba-74430260032c.png)
+![depop1](https://user-images.githubusercontent.com/29719483/34895125-2d2b2436-f799-11e7-9ce0-bc062547cfb9.png)
