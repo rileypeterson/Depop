@@ -3,6 +3,8 @@ Program to follower and unfollow users
 
 Steps/Requirements to use this code:  
 
+Please read this in its entirety.
+
 1. Install Python (https://www.python.org/downloads/). Personally I use Spyder IDE through Anaconda (https://www.anaconda.com/download/).  
 
 2. Install chromedriver (https://sites.google.com/a/chromium.org/chromedriver/downloads). You might be able to use PhantomJS or others, but this is set up for Chrome.  
