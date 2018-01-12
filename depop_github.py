@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 """
+Created on Thu Jan 11 12:16:47 2018
+
+@author: Riley Peterson
+"""
+
+# -*- coding: utf-8 -*-
+"""
 Created on Thu Jul 20 14:28:40 2017
 
 @author: Riley Peterson
@@ -7,113 +14,148 @@ Created on Thu Jul 20 14:28:40 2017
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-
+import random
 import time
 import sys
 
-chrome_path = r"your/chrome/driver/executable.exe" ###Path to your chromedriver executable
+
+chrome_path = r"your\path\to\chromedriver.exe"
 driver = webdriver.Chrome(chrome_path)
 driver.get('https://www.depop.com/')
 time.sleep(3)
 [elm.click() for elm in driver.find_elements_by_xpath("""//span[text()="Login"]""") if elm.text=="Login"]      #Clicks login button
-
+home_user="yourusernamehere"
 input("Type in login details, then press enter, then press enter to continue running script")
 mode = input("select mode (following, unfollowing):")
 
 
-driver.get('https://www.depop.com/yourusernamehere')  #Path to your homepage
+driver.get('https://www.depop.com/'+home_user)
 #Now at home profile page
 time.sleep(3)
-elm5 = driver.find_element_by_xpath("""//span[contains(text(),' Following')]""")
-num_fol = int(elm5.text.replace(' Following',''))
+prof_following_elm = driver.find_element_by_xpath("""//span[contains(text(),' Following')]""")
+prof_following_num = int(prof_following_elm.text.replace(' Following',''))
+prof_follower_elm = driver.find_element_by_xpath("""//span[contains(text(),' Followers')]""")
+prof_follower_num = int(prof_follower_elm.text.replace(' Followers',''))
 if mode=="unfollowing":
-    elm5.click()
+    prof_following_elm.click()
     time.sleep(3)
-    elm = driver.find_element_by_tag_name('html')
-    list_of_following=driver.find_elements_by_xpath("""//span[text()='Following']""")
-    while len(list_of_following)>0:
-        for i in list_of_following:
+    scroll_elm = driver.find_element_by_tag_name('html')
+    sauce=driver.page_source
+    sauce=sauce.split()
+    sauce=[i for i in sauce if "data" in i and "Following" in i and "span" in i][-1]
+    data_word=sauce.split("=")[0]
+    users_unfollowed=0
+    reset_switch=0
+    while users_unfollowed<prof_following_num:
+        scroll_elm.send_keys(Keys.END)
+        for user in driver.find_elements_by_css_selector("["+data_word+"='']"):
             try:
-                if i.is_displayed()==True and i.text=="Following":
-                    i.click()
+                user.click()
+                users_unfollowed=users_unfollowed+1
+                reset_switch=reset_switch+1
             except:
                 pass
-        reset_time=time.time()
-        while (time.time()-reset_time)<300:
-            elm.send_keys(Keys.END)
-        list_of_following=driver.find_elements_by_xpath("""//span[text()='Following']""")
-
-        
+        if reset_switch>300:
+            driver.refresh()
+            prof_following_elm = driver.find_element_by_xpath("""//span[contains(text(),' Following')]""")
+            prof_following_num = int(prof_following_elm.text.replace(' Following',''))
+            prof_following_elm.click()
+            time.sleep(3)
+            users_unfollowed=0
+            reset_switch=0
+            scroll_elm = driver.find_element_by_tag_name('html')
+    print("Done unfollowing.")
 
 if mode=="following":
-    [elm.click() for elm in driver.find_elements_by_xpath("""//span[text()="Search"]""") if elm.text=="Search"]
-    us = input("type username to rip followers from:")
-    us = "@"+us
-    driver.find_element_by_xpath("""//input[@type='text']""").send_keys(us) #searches for user
-    driver.find_element_by_xpath("""//input[@type='text']""").send_keys(Keys.ENTER) #goes to user profile
+    prof_follower_elm.click()
     time.sleep(3)
-    end = int(driver.find_element_by_xpath("""//span[contains(text(),' Followers')]""").text.replace(" Followers",""))
-    elm5 = driver.find_element_by_xpath("""//span[contains(text(),' Followers')]""")
-    elm5.click()
-    time.sleep(5)
-    if end+num_fol>7500:
-        end=7500-num_fol
-    else:
-        pass
-    k=0
-    m=0
-    file = open('people_ive_followed.txt','r')
-    txt = file.readlines()
-    followed_people=[]
-    for line in txt:
-        followed_people.append(line.strip())
-    while k<end:
-        j = driver.find_elements_by_xpath("""//span[text()='Follow']""")[1:] #possible people to follow
-        y = driver.find_elements_by_xpath("""//p[text()='@']""")[1:] #names of people
-        n = len(j)
-        print("j is "+str(n)+" long")
-        print('clicking mode')
-        file1 = open('people_ive_followed.txt','a')
-        for i in range(m,n):
-            print("we are on:"+str(y[i].text))
-            try:
-                if j[i].text=='':
-                    print('j[i].text equals null at i equals', i)   #Already following case
-                    print('Already following: ', y[i].text)
-                if j[i].text=='Follow' and y[i].text not in followed_people:    #Not/Haven't Following/Followed
-                    j[i].click()
-                    print('We followed: ', y[i].text)
-                    file1.write(y[i].text)
-                    file1.write('\n')
-                if j[i].text=='Follow' and y[i].text in followed_people:
-                    k=k-1
-                    print('Already followed in the past: ', y[i].text)
-            except:
-                print('SOMETHING WEIRD HAPPENED')
-            k=k+1
-        file1.close()
-        f=len(j)+20
-        print('f is',f)
-        print('scrolling mode')
-        old_time = time.time()
-        while len(j)<f:
-            elm = driver.find_element_by_tag_name('html')
-            elm.send_keys(Keys.END)
-            elm.send_keys(Keys.END)
-            elm.send_keys(Keys.END)
-            print('scroll')
-            time.sleep(3)
-            j = driver.find_elements_by_xpath("""//span[text()='Follow']""")[1:]
-            y = driver.find_elements_by_xpath("""//p[text()='@']""")[1:]
-            print('the len of j is now '+str(len(j)))
-            print('length j less than '+str(f))
-            if (time.time()-old_time)>300:
-                print('took too long')
-                print('k is:'+str(k))
-                k=100000000
+    sauce=driver.page_source
+    sauce=sauce.split()
+    sauce=[i for i in sauce if "data-css" in i and "Follow" in i and "span" in i]
+    sauce=list(set(sauce))
+    break_button_1="no"
+    while break_button_1=="no":
+        for data in sauce:
+            scroll_elm = driver.find_element_by_tag_name('html')
+            driver.find_elements_by_xpath("""//p[contains(text(),'@')]""")[1:][0].click()
+            scroll_elm.send_keys(Keys.END)
+            data_word=data.split("=")[0]
+            buttons=driver.find_elements_by_css_selector("["+data_word+"='']")[1:]
+            for button in buttons:
+                if button.text=="Follow" and button.is_displayed():
+                    break_button_1="yes"
+                    break
+            if break_button_1=="yes":
                 break
-        print('k is '+str(k))
-        m=n
-
-
-
+        sauce=driver.page_source
+        sauce=sauce.split()
+        sauce=[i for i in sauce if "data-css" in i and "Follow" in i and "span" in i]
+        sauce=list(set(sauce))
+    print(data_word)
+    def rip_followers(username,data_word,prof_following_num,total_users_followed=0):
+        driver.get('https://www.depop.com/'+username)
+        user_follower_elm = driver.find_element_by_xpath("""//span[contains(text(),' Followers')]""")
+        user_follower_num = int(user_follower_elm.text.replace(' Followers',''))
+        if user_follower_num>300:
+            user_follower_num=300
+        user_follower_elm.click()
+        time.sleep(8)
+        scroll_elm = driver.find_element_by_tag_name('html')
+        new_start_time=time.time()
+        while time.time()-new_start_time<30:
+            try:
+                driver.find_elements_by_xpath("""//p[contains(text(),'@')]""")[1:][0].click()
+                break
+            except:
+                pass
+        users_followed,break_button=0,"no"
+        while users_followed<user_follower_num:
+            scroll_elm.send_keys(Keys.END)
+            follow_buttons=driver.find_elements_by_css_selector("["+data_word+"='']")[1:]
+            usernames=driver.find_elements_by_xpath("""//p[contains(text(),'@')]""")[1:]
+            for user in follow_buttons:
+                try:
+                    user.click()
+                    users_followed=users_followed+1
+                    total_users_followed=total_users_followed+1
+                    if total_users_followed+prof_following_num>=7499:
+                        break_button="yes"
+                        break
+                except:
+                    pass
+            scroll_elm.send_keys(Keys.END)
+            if len(follow_buttons)==len(driver.find_elements_by_css_selector("["+data_word+"='']")[1:]):
+                start_time=time.time()
+                while time.time()-start_time<5:
+                    scroll_elm.send_keys(Keys.END)
+                    if len(follow_buttons)!=len(driver.find_elements_by_css_selector("["+data_word+"='']")[1:]):
+                        break_button_2="no"
+                        break
+                    else:
+                        break_button_2="yes"
+                if break_button_2=="yes":
+                    break
+            if break_button=="yes":
+                print("hit break button")
+                break
+        print("Done following "+username+" followers. Followed "+str(users_followed)+" users.")
+        text_usernames=[i.text.replace("@","") for i in usernames[:25]]
+        return text_usernames,users_followed,break_button,total_users_followed
+    total_users_followed=0
+    username=input("First username to use:")
+    break_button="no"
+    while break_button=="no":
+        new_users,dummy,break_button,total_users_followed=rip_followers(username,data_word,prof_following_num,total_users_followed=total_users_followed)
+        random.shuffle(new_users)
+        user_follower_num,j=0,0
+        while user_follower_num==0:
+            nombre=new_users[j]
+            driver.get('https://www.depop.com/'+nombre)
+            user_follower_elm = driver.find_element_by_xpath("""//span[contains(text(),' Followers')]""")
+            user_follower_num = int(user_follower_elm.text.replace(' Followers',''))
+            if user_follower_num>10:
+                username=nombre
+                break
+            j=j+1
+        
+        
