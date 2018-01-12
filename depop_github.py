@@ -30,7 +30,7 @@ if mode=="unfollowing":
     elm5.click()
     time.sleep(3)
     elm = driver.find_element_by_tag_name('html')
-    list_of_following=driver.find_elements_by_xpath("""//span[text()='ing']""")
+    list_of_following=driver.find_elements_by_xpath("""//span[text()='Following']""")
     while len(list_of_following)>0:
         for i in list_of_following:
             try:
@@ -41,7 +41,7 @@ if mode=="unfollowing":
         reset_time=time.time()
         while (time.time()-reset_time)<300:
             elm.send_keys(Keys.END)
-        list_of_following=driver.find_elements_by_xpath("""//span[text()='ing']""")
+        list_of_following=driver.find_elements_by_xpath("""//span[text()='Following']""")
 
         
 
