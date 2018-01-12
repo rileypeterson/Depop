@@ -1,17 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jan 11 12:16:47 2018
-
-@author: Riley Peterson
-"""
-
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jul 20 14:28:40 2017
-
-@author: Riley Peterson
-"""
-
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import random
