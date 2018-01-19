@@ -18,9 +18,9 @@ mode = input("select mode (following, unfollowing):")
 driver.get('https://www.depop.com/'+home_user)
 #Now at home profile page
 time.sleep(3)
-prof_following_elm = driver.find_element_by_xpath("""//span[contains(text(),' Following')]""")
+prof_following_elm = driver.find_element_by_xpath("""//span[contains(text(),'Following')]""").find_element_by_xpath("..")
 prof_following_num = int(prof_following_elm.text.replace(' Following',''))
-prof_follower_elm = driver.find_element_by_xpath("""//span[contains(text(),' Followers')]""")
+prof_follower_elm = driver.find_element_by_xpath("""//span[contains(text(),'Followers')]""").find_element_by_xpath("..")
 prof_follower_num = int(prof_follower_elm.text.replace(' Followers',''))
 if mode=="unfollowing":
     prof_following_elm.click()
@@ -43,7 +43,7 @@ if mode=="unfollowing":
                 pass
         if reset_switch>300:
             driver.refresh()
-            prof_following_elm = driver.find_element_by_xpath("""//span[contains(text(),' Following')]""")
+            prof_following_elm = driver.find_element_by_xpath("""//span[contains(text(),'Following')]""").find_element_by_xpath("..")
             prof_following_num = int(prof_following_elm.text.replace(' Following',''))
             prof_following_elm.click()
             time.sleep(3)
@@ -80,7 +80,7 @@ if mode=="following":
     print(data_word)
     def rip_followers(username,data_word,prof_following_num,total_users_followed=0):
         driver.get('https://www.depop.com/'+username)
-        user_follower_elm = driver.find_element_by_xpath("""//span[contains(text(),' Followers')]""")
+        user_follower_elm = driver.find_element_by_xpath("""//span[contains(text(),'Followers')]""").find_element_by_xpath("..")
         user_follower_num = int(user_follower_elm.text.replace(' Followers',''))
         if user_follower_num>300:
             user_follower_num=300
@@ -137,7 +137,7 @@ if mode=="following":
         while user_follower_num==0:
             nombre=new_users[j]
             driver.get('https://www.depop.com/'+nombre)
-            user_follower_elm = driver.find_element_by_xpath("""//span[contains(text(),' Followers')]""")
+            user_follower_elm = driver.find_element_by_xpath("""//span[contains(text(),'Followers')]""").find_element_by_xpath("..")
             user_follower_num = int(user_follower_elm.text.replace(' Followers',''))
             if user_follower_num>10:
                 username=nombre
