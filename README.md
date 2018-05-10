@@ -30,7 +30,7 @@ If you want to follow users type "following" at the Python prompt and press ente
 
 If you want to unfollow users (Depop only lets you follow 7,500 users) type "unfollowing" into the Python prompt. This will unfollow all the users you are currently following.  
 
-Note: It is ~~possible~~ true (as of 5/9/2018) that using this program violates the terms of service for Depop, though I can find no explicit mention of this practice. I am not responsible for any resulting action that comes from using this script (such as the suspension of your account or legal action). I wrote this to see if it would work and so I wouldn't have to personally follow users in order to attract traffic to my account. I should also say that using this will not necessarily increase the sale of your products (though it will probably increase your follower count). Use at your own risk and do not abuse.  
+Note: It is ~~possible~~ apparently true (as of 5/9/2018) that using this program violates the terms of service for Depop, though I can find no explicit mention of this practice. I am not responsible for any resulting action that comes from using this script (such as the suspension of your account or legal action). I wrote this to see if it would work and so I wouldn't have to personally follow users in order to attract traffic to my account. I should also say that using this will not necessarily increase the sale of your products (though it will probably increase your follower count). Use at your own risk and do not abuse.  
 
 
 ![depop2](https://user-images.githubusercontent.com/29719483/34895127-2d5fcb1e-f799-11e7-81ba-74430260032c.png)
