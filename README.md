@@ -1,8 +1,6 @@
 # Depop
 Program to follower and unfollow users
 
-"We don't encourage the use of bots on our platform, so please refrain from doing so!"-Depop Representative  
-
 ## Warning  
 
 My account was deleted 5/9/2018 citing a violation of the [terms of service](http://explore.depop.com/en/terms/) 
