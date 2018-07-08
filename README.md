@@ -15,7 +15,7 @@ Please read this in its entirety.
 
 2. Install chromedriver (https://sites.google.com/a/chromium.org/chromedriver/downloads). You might be able to use PhantomJS or others, but this is set up for Chrome.  
 
-3. Fork, clone, or copy/paste the code into a Python script.  
+3. Fork, clone, or copy/paste the code into a Python script. Starring this repo would also be appreciated :)  
 
 3. Define the variable chrome_path to be the path to your chromedriver executable. 
 E.g. chrome_driver = r"C:\Users\John_Doe\Downloads\chromedriver_win32\chromedriver.exe"  
