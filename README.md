@@ -11,7 +11,7 @@ I don't think this program falls under that category, but nevertheless I cannot 
 
 Please read this in its entirety.
 
-1. Install Python (**get any recent version of python3**) (https://www.python.org/downloads/). Personally I use Spyder IDE through Anaconda (https://www.anaconda.com/download/).  
+1. Install Python (**get any recent version of python3**) (https://www.python.org/downloads/). Personally I use Spyder IDE through Anaconda (https://www.anaconda.com/download/). Be sure to `pip install selenium` or with conda: `conda install selenium`  
 
 2. Install chromedriver (https://sites.google.com/a/chromium.org/chromedriver/downloads). You might be able to use PhantomJS or others, but this is set up for Chrome.  
 
