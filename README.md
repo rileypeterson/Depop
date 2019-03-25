@@ -1,3 +1,6 @@
+# Status
+As of 03/25/2019, this script according to [multiple accounts](https://github.com/rileypeterson/Depop/issues) is failing. I'm going to look into patching it, but for anyone viewing this now I'm trying to save you some time.
+
 # Depop
 Program to follower and unfollow users
 
