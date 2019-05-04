@@ -42,6 +42,7 @@ driver = webdriver.Chrome(chrome_path)
 
 class Follower(object):
     BASE_URL = 'https://www.depop.com/'
+    LOGIN_URL = 'https://www.depop.com/login'
     def __init__(self, driver, home_user="", env='prod'):
         print("Starting Depop Follower...")
         self.driver = driver
@@ -56,10 +57,19 @@ class Follower(object):
         self.on_following_list = False
         self.home_user_logged_in = False
         if self.env == 'prod':
-            self.current_username = input("First username to use:")
+            self.mode = input("select mode (following, unfollowing):")
+            assert self.mode == 'following' or self.mode == 'unfollowing', \
+                "Unrecognized mode. Possible mode are 'following' or 'unfollowing'"
+            if self.mode == 'following':
+                # If following ask for a first user name to follow
+                self.current_username = input("First username to use:")
+            else:
+                # Because we're going to unfollow...
+                self.current_username = self.home_user
         else:
             # I'm lazy
             self.current_username = 'gsvwear'
+            self.mode = 'following'
         self.current_username_num_followers = 0
         self.current_username_num_following = 0
         self.followed_users = []
@@ -108,21 +118,11 @@ class Follower(object):
 
     def nav_to_mainpage(self):
         # Make the driver and navigate to the depop main page.
-        self.driver.get(self.BASE_URL)
-        time.sleep(3)
         if env == 'prod':
             # If in production we should login
-            elms = self.find_elements(self.driver.find_elements_by_xpath, """//span[text()="Login"]""",
-                                      "Failed to find login elements")
-            for elm in elms:
-                if elm.text == "Login":
-                    self.click_elm(elm, error="Failed to click login button")
+            self.driver.get(self.LOGIN_URL)
             input("Type in login details, then press enter, then press enter to continue running script")
             self.home_user_logged_in = True
-            self.mode = input("select mode (following, unfollowing):")
-        else:
-            self.mode = 'following'
-        assert self.mode == 'following' or self.mode == 'unfollowing', "Unrecognized mode."
 
     def _get_following_elm(self):
         following_elm_child = self.find_element(self.driver.find_element_by_xpath,
@@ -285,7 +285,7 @@ f = Follower(driver, home_user, env)
 f.nav_to_mainpage()
 # Go to home user and get their stats
 f.get_user_stats(f.home_user)
-f.follow('oldfinds')
+f.follow(f.current_username)
 
 # # Enter following mode
 # if mode=="following":
