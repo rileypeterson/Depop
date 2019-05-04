@@ -3,6 +3,7 @@ import random
 import time
 import json
 
+
 # Third Party Imports
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -43,6 +44,8 @@ driver = webdriver.Chrome(chrome_path)
 class Follower(object):
     BASE_URL = 'https://www.depop.com/'
     LOGIN_URL = 'https://www.depop.com/login'
+    MAX_USERS = 7499
+    SUCCESSFUL_FOLLOW_MESSAGE = "Successfully followed {}! Have followed {} user(s)."
     def __init__(self, driver, home_user="", env='prod'):
         print("Starting Depop Follower...")
         self.driver = driver
@@ -181,9 +184,20 @@ class Follower(object):
     def click_on_follower_list(self):
         self.click_elm(self._get_follower_elm())
         elms = []
-        while not elms:
-            elms = self.find_elements(driver.find_elements_by_xpath, """//p[contains(text(),'@')]""")[1:]
-            time.sleep(1)
+        total_time = time.time()
+        st = time.time()
+        while (time.time() - st) < 20:
+            while not elms:
+                elms = self.find_elements(driver.find_elements_by_xpath, """//p[contains(text(),'@')]""")[1:]
+                time.sleep(1)
+            if elms:
+                break
+            else:
+                if (time.time() - total_time) > 100:
+                    raise TimeoutError("Failed to click on follower list")
+                driver.navigate().refresh()
+                self.click_elm(self._get_follower_elm())
+                st = time.time()
         print("Follower list loaded successfully")
 
     def click_on_following_list(self):
@@ -200,6 +214,19 @@ class Follower(object):
         unames = [e.text.replace('@', '') for e in name_elms]
         return unames, follow_btns_elms
 
+    def handle_not_login_error(self, fol_btn, uname):
+        print("Trying to click out of alert")
+        try:
+            action = webdriver.common.action_chains.ActionChains(self.driver)
+            self.window_size = self.driver.get_window_rect()
+            click_spot = int(0.9 * (self.window_size['width'] - fol_btn.location['x']))
+            action.move_to_element_with_offset(fol_btn, click_spot, 0).click().perform()
+            print("Attempting click again")
+            self.click_elm(fol_btn)
+            print(self.SUCCESSFUL_FOLLOW_MESSAGE.format(uname, self.total_users_followed))
+            self.followed_users.append(uname)
+        except Exception as e:
+            raise e
 
     def follow_from_list(self, max_num=50):
         max_to_follow = min(max_num, self.current_username_num_followers)
@@ -217,31 +244,23 @@ class Follower(object):
                     print("Attempting click on follower button")
                     try:
                         self.click_elm(fol_btn)
-                        print("Successfully followed {}!".format(uname))
+                        print(self.SUCCESSFUL_FOLLOW_MESSAGE.format(uname, self.total_users_followed))
                         self.followed_users.append(uname)
                         i += 1
                         leading_ind += 1
+                        self.total_users_followed += 1
                     except Exception as e:
                         if str(e).startswith("Message: unknown error: Element <span>...</span> is not clickable at point"):
-                            print("Trying to click out of alert")
-                            try:
-                                action = webdriver.common.action_chains.ActionChains(self.driver)
-                                self.window_size = self.driver.get_window_rect()
-                                click_spot = int(0.9 * (self.window_size['width'] - fol_btn.location['x']))
-                                action.move_to_element_with_offset(fol_btn, click_spot, 0).click().perform()
-                                print("Attempting click again")
-                                self.click_elm(fol_btn)
-                                print("Successfully followed {}!".format(uname))
-                                self.followed_users.append(uname)
-                                i += 1
-                                leading_ind += 1
-                            except Exception as e:
-                                raise e
+                            self.handle_not_login_error(fol_btn, uname)
+                            i += 1
+                            leading_ind += 1
+                            self.total_users_followed += 1
                         else:
                             raise e
-                time.sleep(0.5)
+                time.sleep(random.random())
             unames, follow_btns_elms = self._get_unames_and_fol_btns(leading_ind)
             zipper = zip(unames, follow_btns_elms)
+        return unames
                     # print("Successfully clicked on follower button")
 
         # Don't try to follow users if we already followed them
@@ -273,10 +292,15 @@ class Follower(object):
         #     scroll_elm.send_keys(Keys.END)
 
     def follow(self, username):
-        print("Following the followers of {}".format(username))
-        self.get_user_stats(username)
-        self.click_on_follower_list()
-        self.follow_from_list()
+        unames = [username]
+        while self.total_users_followed < self.MAX_USERS:
+            u = random.choice(unames)
+            print("Potentially following the followers of {}".format(u))
+            self.get_user_stats(u)
+            # If less than 10 it's not really worth it...
+            if self.current_username_num_followers > 10:
+                self.click_on_follower_list()
+                unames = self.follow_from_list()
 
 
 
