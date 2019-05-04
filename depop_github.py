@@ -62,6 +62,8 @@ class Follower(object):
             self.current_username = 'gsvwear'
         self.current_username_num_followers = 0
         self.current_username_num_following = 0
+        self.followed_users = []
+        self.window_size = None
 
     def set_on_attr(self, attr_to_set):
         self.on_user_page = False
@@ -74,8 +76,9 @@ class Follower(object):
             error = "Failed to find an element with string arg {}".format(arg)
         try:
             ret = callable(arg)
-        except:
-            raise FindingElementError(error)
+        except Exception as e:
+            print(error)
+            raise e
         return ret
 
     def find_elements(self, callable, arg, error=""):
@@ -83,7 +86,8 @@ class Follower(object):
             error = "Failed to find elements with string arg {}".format(arg)
         try:
             ret = callable(arg)
-        except:
+        except Exception as e:
+            print(error)
             raise FindingElementError(error)
         return ret
 
@@ -92,8 +96,9 @@ class Follower(object):
             error = "Failed to click element with text {}".format(elm.text)
         try:
             elm.click()
-        except:
-            raise ClickError(error)
+        except Exception as e:
+            print(error)
+            raise e
 
     def nav_to_user(self, username=None):
         if not username:
@@ -127,8 +132,9 @@ class Follower(object):
         # TODO: Fix. You should enable method on obj that isn't driver
         try:
             following_elm_parent = following_elm_child.find_element_by_xpath("..")
-        except:
-            FindingElementError("Failed to find following element parent")
+        except Exception as e:
+            print("Failed to find following element parent")
+            raise e
         return following_elm_parent
 
     def _get_follower_elm(self):
@@ -139,9 +145,17 @@ class Follower(object):
         # TODO: Fix. You should enable method on obj that isn't driver
         try:
             follower_elm_parent = follower_elm_child.find_element_by_xpath("..")
-        except:
-            FindingElementError("Failed to find follower element parent")
+        except Exception as e:
+            print("Failed to find follower element parent")
+            raise e
         return follower_elm_parent
+
+    def print_elm_attrs(self, elm):
+        print("Location: ", elm.location,
+              "Size: ", elm.size,
+              "Text: ", elm.text,
+              "Is selected:", elm.is_selected(),
+              "Is enabled:", elm.is_enabled())
 
     def get_user_stats(self, username=None):
         if not username:
@@ -166,16 +180,86 @@ class Follower(object):
 
     def click_on_follower_list(self):
         self.click_elm(self._get_follower_elm())
-        time.sleep(20)
+        elms = []
+        while not elms:
+            elms = self.find_elements(driver.find_elements_by_xpath, """//p[contains(text(),'@')]""")[1:]
+            time.sleep(1)
+        print("Follower list loaded successfully")
 
     def click_on_following_list(self):
         self.click_elm(self._get_following_elm())
-        time.sleep(20)
+
+    def follow_from_list(self, max_num=50):
+        max_to_follow = min(max_num, self.current_username_num_followers)
+        i = 0
+        leading_ind = 1
+
+
+        name_elms = self.find_elements(driver.find_elements_by_xpath, """//p[contains(text(),'@')]""",
+                                       "Could not get name elms")[leading_ind:]
+        # Rescope the follower list
+        self.click_elm(name_elms[-1])
+        follow_btns_elms = self.find_elements(driver.find_elements_by_xpath, """//span[contains(text(),'Follow')]""",
+                                              "Could not get follow button elms")[leading_ind:]
+        follow_btns_elms = [e for e in follow_btns_elms if e.text == "Follow"]
+        unames = [e.text.replace('@', '') for e in name_elms]
+
+
+
+
+        while i < max_to_follow:
+            for uname, fol_btn in zip(unames, follow_btns_elms):
+                if uname not in self.followed_users:
+                    print("Attempting to follow {}".format(uname))
+                    print("Attempting click on follower button")
+                    try:
+                        self.click_elm(fol_btn)
+                    except Exception as e:
+                        print(str(e))
+                        print("Trying to click elm anyways")
+                        try:
+                            action = webdriver.common.action_chains.ActionChains(self.driver)
+                            action.move_to_element_with_offset(fol_btn, 100, 100).click().perform()
+                        except Exception as e:
+                            raise e
+                        time.sleep(100)
+                    # print("Successfully clicked on follower button")
+
+        # Don't try to follow users if we already followed them
+        # _user_names = [u for u in _user_names if u not in _followed_users]
+        # _user_elms = [e for e in driver.find_elements_by_xpath("""//span[contains(text(),'Follow')]""")[1:] if e.text == 'Follow']
+        # _user_elms = _user_elms[_num_followed:]
+        # for u, e in zip(_user_names, _user_elms):
+        #     print("Trying to follow: {}".format(u))
+        #     e.click()
+        #     print("Successfully followed: {}".format(u))
+        #     if env == 'dev':
+        #         # Close out of the both that comes up because I don't have an account
+        #         time.sleep(2)
+        #         # TODO: Fill bare exceptions
+        #         try:
+        #             driver.find_element_by_xpath("""//*[@id="mount"]/div/div/div[7]/div[2]/*""").click()
+        #         except:
+        #             try:
+        #                 driver.find_element_by_xpath("""/html/body/div[4]/div/div[2]/div/div/svg/path""").click()
+        #
+        #             except:
+        #                 pass
+        #         time.sleep(2)
+        #         # Refocus the scrolling
+        #     try:
+        #         driver.find_elements_by_xpath("""//p[contains(text(),'@')]""")[1:][0].click()
+        #     except:
+        #         print("Could not refocus scrolling element")
+        #     scroll_elm.send_keys(Keys.END)
 
     def follow(self, username):
-        print("Following {}".format(username))
+        print("Following the followers of {}".format(username))
         self.get_user_stats(username)
         self.click_on_follower_list()
+        self.follow_from_list()
+
+
 
 f = Follower(driver, home_user, env)
 # Login
