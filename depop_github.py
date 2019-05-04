@@ -189,40 +189,59 @@ class Follower(object):
     def click_on_following_list(self):
         self.click_elm(self._get_following_elm())
 
+    def _get_unames_and_fol_btns(self, leading_ind):
+        name_elms = self.find_elements(driver.find_elements_by_xpath, """//p[contains(text(),'@')]""",
+                                       "Could not get name elms")[leading_ind:]
+        # Rescope the follower list
+        # self.click_elm(name_elms[-1])
+        follow_btns_elms = self.find_elements(driver.find_elements_by_xpath, """//span[contains(text(),'Follow')]""",
+                                              "Could not get follow button elms")[leading_ind:]
+        follow_btns_elms = [e for e in follow_btns_elms if e.text == "Follow"]
+        unames = [e.text.replace('@', '') for e in name_elms]
+        return unames, follow_btns_elms
+
+
     def follow_from_list(self, max_num=50):
         max_to_follow = min(max_num, self.current_username_num_followers)
         i = 0
         leading_ind = 1
 
-
-        name_elms = self.find_elements(driver.find_elements_by_xpath, """//p[contains(text(),'@')]""",
-                                       "Could not get name elms")[leading_ind:]
-        # Rescope the follower list
-        self.click_elm(name_elms[-1])
-        follow_btns_elms = self.find_elements(driver.find_elements_by_xpath, """//span[contains(text(),'Follow')]""",
-                                              "Could not get follow button elms")[leading_ind:]
-        follow_btns_elms = [e for e in follow_btns_elms if e.text == "Follow"]
-        unames = [e.text.replace('@', '') for e in name_elms]
-
-
-
-
+        unames, follow_btns_elms = self._get_unames_and_fol_btns(leading_ind)
+        zipper = zip(unames, follow_btns_elms)
         while i < max_to_follow:
-            for uname, fol_btn in zip(unames, follow_btns_elms):
+            for uname, fol_btn in zipper:
+                if i > max_to_follow:
+                    break
                 if uname not in self.followed_users:
                     print("Attempting to follow {}".format(uname))
                     print("Attempting click on follower button")
                     try:
                         self.click_elm(fol_btn)
+                        print("Successfully followed {}!".format(uname))
+                        self.followed_users.append(uname)
+                        i += 1
+                        leading_ind += 1
                     except Exception as e:
-                        print(str(e))
-                        print("Trying to click elm anyways")
-                        try:
-                            action = webdriver.common.action_chains.ActionChains(self.driver)
-                            action.move_to_element_with_offset(fol_btn, 100, 100).click().perform()
-                        except Exception as e:
+                        if str(e).startswith("Message: unknown error: Element <span>...</span> is not clickable at point"):
+                            print("Trying to click out of alert")
+                            try:
+                                action = webdriver.common.action_chains.ActionChains(self.driver)
+                                self.window_size = self.driver.get_window_rect()
+                                click_spot = int(0.9 * (self.window_size['width'] - fol_btn.location['x']))
+                                action.move_to_element_with_offset(fol_btn, click_spot, 0).click().perform()
+                                print("Attempting click again")
+                                self.click_elm(fol_btn)
+                                print("Successfully followed {}!".format(uname))
+                                self.followed_users.append(uname)
+                                i += 1
+                                leading_ind += 1
+                            except Exception as e:
+                                raise e
+                        else:
                             raise e
-                        time.sleep(100)
+                time.sleep(0.5)
+            unames, follow_btns_elms = self._get_unames_and_fol_btns(leading_ind)
+            zipper = zip(unames, follow_btns_elms)
                     # print("Successfully clicked on follower button")
 
         # Don't try to follow users if we already followed them
