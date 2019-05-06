@@ -164,6 +164,7 @@ class Follower(object):
         if not username:
             username = self.current_username
         self.nav_to_user(username)
+        time.sleep(1)
         if not self.on_user_page:
             raise ValueError("You're trying to ascertain user stats, but you aren't on the user page")
         print("Getting stats for {}".format(username))
