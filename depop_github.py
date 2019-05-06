@@ -176,10 +176,10 @@ class Follower(object):
         if self.current_username == self.home_user:
             self.home_user_num_following = self.current_username_num_following
             self.home_user_num_followers = self.current_username_num_followers
-            print("{} is following {} user(s) "
-                  "and have {} follower(s).".format(username,
-                                                    self.home_user_num_following,
-                                                    self.home_user_num_followers))
+        print("\n{} is following {} user(s) "
+              "and have {} follower(s).\n".format(username,
+                                                self.current_username_num_following,
+                                                self.current_username_num_followers))
 
     def click_on_follower_list(self):
         self.click_elm(self._get_follower_elm())
@@ -228,14 +228,16 @@ class Follower(object):
         except Exception as e:
             raise e
 
-    def follow_from_list(self, max_num=50):
+    def follow_from_list(self, max_num=50, timeout=60):
         max_to_follow = min(max_num, self.current_username_num_followers)
-        i = 0
+        st = time.time()
+        i = 1
         leading_ind = 1
+        scroll_elm = self.find_element(driver.find_element_by_tag_name, 'html', "Couldn't find scroll_elm")
 
         unames, follow_btns_elms = self._get_unames_and_fol_btns(leading_ind)
         zipper = zip(unames, follow_btns_elms)
-        while i < max_to_follow:
+        while i < max_to_follow and (time.time() - st) < timeout:
             for uname, fol_btn in zipper:
                 if i > max_to_follow:
                     break
@@ -244,22 +246,24 @@ class Follower(object):
                     print("Attempting click on follower button")
                     try:
                         self.click_elm(fol_btn)
-                        print(self.SUCCESSFUL_FOLLOW_MESSAGE.format(uname, self.total_users_followed))
-                        self.followed_users.append(uname)
                         i += 1
                         leading_ind += 1
                         self.total_users_followed += 1
+                        self.followed_users.append(uname)
+                        print(self.SUCCESSFUL_FOLLOW_MESSAGE.format(uname, self.total_users_followed))
                     except Exception as e:
                         if str(e).startswith("Message: unknown error: Element <span>...</span> is not clickable at point"):
-                            self.handle_not_login_error(fol_btn, uname)
                             i += 1
                             leading_ind += 1
                             self.total_users_followed += 1
+                            self.handle_not_login_error(fol_btn, uname)
                         else:
                             raise e
                 time.sleep(random.random())
+            scroll_elm.send_keys(Keys.END)
             unames, follow_btns_elms = self._get_unames_and_fol_btns(leading_ind)
             zipper = zip(unames, follow_btns_elms)
+        unames, follow_btns_elms = self._get_unames_and_fol_btns(0)
         return unames
                     # print("Successfully clicked on follower button")
 
@@ -296,11 +300,21 @@ class Follower(object):
         while self.total_users_followed < self.MAX_USERS:
             u = random.choice(unames)
             print("Potentially following the followers of {}".format(u))
-            self.get_user_stats(u)
+            retries = 0
+            while retries < 4:
+                try:
+                    self.get_user_stats(u)
+                    break
+                except:
+                    print("Failed to get user stats retrying")
+                    retries += 1
             # If less than 10 it's not really worth it...
             if self.current_username_num_followers > 10:
                 self.click_on_follower_list()
+                time.sleep(random.random())
                 unames = self.follow_from_list()
+            elif self.current_username_num_followers <= 10 and self.total_users_followed == 0:
+                raise ValueError("The first user you want to follow needs to have more than 10 followers.")
 
 
 
