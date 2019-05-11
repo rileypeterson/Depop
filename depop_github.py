@@ -50,6 +50,7 @@ class Follower(object):
         print("Starting Depop Follower...")
         self.driver = driver
         self.total_users_followed = 0
+        self.total_users_unfollowed = 0
         self.mode = None
         self.env = env
         self.home_user = home_user
@@ -76,6 +77,7 @@ class Follower(object):
         self.current_username_num_followers = 0
         self.current_username_num_following = 0
         self.followed_users = []
+        self.unfollowed_users = []
         self.window_size = None
 
     def set_on_attr(self, attr_to_set):
@@ -203,15 +205,31 @@ class Follower(object):
 
     def click_on_following_list(self):
         self.click_elm(self._get_following_elm())
+        elms = []
+        total_time = time.time()
+        st = time.time()
+        while (time.time() - st) < 20:
+            while not elms:
+                elms = self.find_elements(driver.find_elements_by_xpath, """//p[contains(text(),'@')]""")[1:]
+                time.sleep(1)
+            if elms:
+                break
+            else:
+                if (time.time() - total_time) > 100:
+                    raise TimeoutError("Failed to click on follower list")
+                driver.navigate().refresh()
+                self.click_elm(self._get_following_elm())
+                st = time.time()
+        print("Follower list loaded successfully")
 
-    def _get_unames_and_fol_btns(self, leading_ind):
+    def _get_unames_and_fol_btns(self, leading_ind, text="Follow"):
         name_elms = self.find_elements(driver.find_elements_by_xpath, """//p[contains(text(),'@')]""",
                                        "Could not get name elms")[leading_ind:]
         # Rescope the follower list
         # self.click_elm(name_elms[-1])
-        follow_btns_elms = self.find_elements(driver.find_elements_by_xpath, """//span[contains(text(),'Follow')]""",
+        follow_btns_elms = self.find_elements(driver.find_elements_by_xpath, """//span[contains(text(),'{}')]""".format(text),
                                               "Could not get follow button elms")[leading_ind:]
-        follow_btns_elms = [e for e in follow_btns_elms if e.text == "Follow"]
+        follow_btns_elms = [e for e in follow_btns_elms if e.text == "{}".format(text)]
         unames = [e.text.replace('@', '') for e in name_elms]
         return unames, follow_btns_elms
 
@@ -224,8 +242,11 @@ class Follower(object):
             action.move_to_element_with_offset(fol_btn, click_spot, 0).click().perform()
             print("Attempting click again")
             self.click_elm(fol_btn)
-            print(self.SUCCESSFUL_FOLLOW_MESSAGE.format(uname, self.total_users_followed))
-            self.followed_users.append(uname)
+            if self.mode == 'unfollowing':
+                self.unfollowed_users.append(uname)
+            else:
+                print(self.SUCCESSFUL_FOLLOW_MESSAGE.format(uname, self.total_users_followed))
+                self.followed_users.append(uname)
         except Exception as e:
             raise e
 
@@ -317,6 +338,35 @@ class Follower(object):
             elif self.current_username_num_followers <= 10 and self.total_users_followed == 0:
                 raise ValueError("The first user you want to follow needs to have more than 10 followers.")
 
+    def unfollow(self, timeout=60):
+        self.click_on_following_list()
+        leading_ind = 1
+        st = time.time()
+        scroll_elm = self.find_element(driver.find_element_by_tag_name, 'html', "Couldn't find scroll_elm")
+        unames, follow_btns_elms = self._get_unames_and_fol_btns(leading_ind, text="Following")
+        zipper = zip(unames, follow_btns_elms)
+        while (time.time() - st) < timeout:
+            for uname, unfol_btn in zipper:
+                print("Attempting to unfollow {}".format(uname))
+                print("Attempting click on unfollower button")
+                try:
+                    self.click_elm(unfol_btn)
+                    leading_ind += 1
+                    self.total_users_unfollowed += 1
+                    self.unfollowed_users.append(uname)
+                    print(self.SUCCESSFUL_FOLLOW_MESSAGE.format(uname, self.total_users_followed))
+                except Exception as e:
+                    if str(e).startswith("Message: unknown error: Element <span>...</span> is not clickable at point"):
+                        leading_ind += 1
+                        self.total_users_unfollowed += 1
+                        self.handle_not_login_error(unfol_btn, uname)
+                    else:
+                        raise e
+                time.sleep(random.random())
+            scroll_elm.send_keys(Keys.END)
+
+
+
 
 
 f = Follower(driver, home_user, env)
@@ -324,7 +374,10 @@ f = Follower(driver, home_user, env)
 f.nav_to_mainpage()
 # Go to home user and get their stats
 f.get_user_stats(f.home_user)
-f.follow(f.current_username)
+if f.mode == 'following':
+    f.follow(f.current_username)
+elif f.mode == 'unfollowing':
+    f.unfollow()
 
 # # Enter following mode
 # if mode=="following":
