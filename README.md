@@ -1,6 +1,8 @@
 # Status
 As of 03/25/2019, this script according to [multiple accounts](https://github.com/rileypeterson/Depop/issues) is failing. I'm going to look into patching it, but for anyone viewing this now I'm trying to save you some time.
 
+As of 07/29/2019, working on fixing the issues on [this branch](https://github.com/rileypeterson/Depop/tree/bugfix2019), will merge to master once confirmed working. Consensus seems to be that the following mode works, but not the unfollowing. Started a [discord](https://discord.gg/KnU4wSr). 
+
 # Depop
 Program to follower and unfollow users
 
