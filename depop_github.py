@@ -214,7 +214,7 @@ class Follower(object):
 
         """
         following_elm_child = self.find_element(self.driver.find_element_by_xpath,
-                                           """//span[contains(text(),'Following')]""",
+                                           """//span[contains(.,'Following')]""",
                                            error="Couldn't find Following element child")
         # TODO: Must be a better way
         try:
@@ -234,7 +234,7 @@ class Follower(object):
 
         """
         follower_elm_child = self.find_element(self.driver.find_element_by_xpath,
-                                           """//span[contains(text(),'Followers')]""",
+                                           """//span[contains(.,'Followers')]""",
                                            error="Couldn't find Follower element child")
         # TODO: Must be a better way.
         try:
@@ -303,7 +303,7 @@ class Follower(object):
         st = time.time()
         while (time.time() - st) < 20:
             while not elms:
-                elms = self.find_elements(driver.find_elements_by_xpath, """//p[contains(text(),'@')]""")[1:]
+                elms = self.find_elements(driver.find_elements_by_xpath, """//p[contains(.,'@')]""")[1:]
                 time.sleep(1)
             if elms:
                 break
@@ -327,7 +327,7 @@ class Follower(object):
         st = time.time()
         while (time.time() - st) < 20:
             while not elms:
-                elms = self.find_elements(driver.find_elements_by_xpath, """//p[contains(text(),'@')]""")[1:]
+                elms = self.find_elements(driver.find_elements_by_xpath, """//p[contains(.,'@')]""")[1:]
                 time.sleep(1)
             if elms:
                 break
@@ -360,11 +360,11 @@ class Follower(object):
             The list of follow/unfollow button elements.
 
         """
-        name_elms = self.find_elements(driver.find_elements_by_xpath, """//p[contains(text(),'@')]""",
+        name_elms = self.find_elements(driver.find_elements_by_xpath, """//p[contains(.,'@')]""",
                                        "Could not get name elms")[leading_ind:]
         # Rescope the follower list
         # self.click_elm(name_elms[-1])
-        follow_btns_elms = self.find_elements(driver.find_elements_by_xpath, """//span[contains(text(),'{}')]""".format(text),
+        follow_btns_elms = self.find_elements(driver.find_elements_by_xpath, """//span[contains(.,'{}')]""".format(text),
                                               "Could not get {} button elms".format(text))[leading_ind:]
         follow_btns_elms = [e for e in follow_btns_elms if e.text == "{}".format(text)]
         unames = [e.text.replace('@', '') for e in name_elms]
