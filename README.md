@@ -1,4 +1,4 @@
-[![Discord Chat](https://img.shields.io/discord/605627854104821760?label=discord&labelColor=purple)](https://discord.gg/6xNwbe)  
+[![Discord Chat](https://img.shields.io/discord/605627854104821760?label=discord&labelColor=purple)](https://discord.gg/6xNwbe)  ![](https://img.shields.io/badge/status-failing-red)
 
 # Depop
 Program to follower and unfollow users
@@ -9,8 +9,6 @@ My account was deleted 5/9/2018 citing a violation of the [terms of service](htt
 I don't think this program falls under that category, but nevertheless **I cannot advise anyone use this code.** See [Note](#note).
 
 # Status
-As of 10/17/2019, failing.
-
 As of 08/07/2019, I believe I have both the following and unfollowing modes working again. If you experience otherwise please [report a bug](https://github.com/rileypeterson/Depop/blob/master/CONTRIBUTING.md) or chat via [discord](https://discord.gg/KnU4wSr).
 
 #### Steps/Requirements to use this code:  
