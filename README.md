@@ -3,13 +3,15 @@
 # Depop
 Program to follower and unfollow users
 
+# Status
+As recently as November 2019, it has become apparent that Depop is *not* allowing users to follow other users via their online website. Unfortunately as a result, there is really nothing to be done to fix what was once working and this repository has become somewhat of an artifact.
+
+![Unable to follow](https://user-images.githubusercontent.com/29719483/68988800-e6dd5880-07f1-11ea-83dd-3b998fcd6bfe.gif)
+
 # Warning  
 My account was deleted 5/9/2018 citing a violation of the [terms of service](https://depophelp.zendesk.com/hc/en-gb/articles/360001773148-Terms-of-Service) 
 "8. misuse the Service by knowingly introducing viruses, Trojans, worms, logic bombs or other material which would harm the Service or any user of the Service's own equipment;"
 I don't think this program falls under that category, but nevertheless **I cannot advise anyone use this code.** See [Note](#note).
-
-# Status
-As of 08/07/2019, I believe I have both the following and unfollowing modes working again. If you experience otherwise please [report a bug](https://github.com/rileypeterson/Depop/blob/master/CONTRIBUTING.md) or chat via [discord](https://discord.gg/KnU4wSr).
 
 #### Steps/Requirements to use this code:  
 
